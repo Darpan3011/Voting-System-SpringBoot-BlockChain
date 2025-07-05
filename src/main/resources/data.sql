@@ -1,17 +1,17 @@
 -- Insert default admin user (password: admin123)
 INSERT INTO users (username, email, password_hash, first_name, last_name, role, is_verified, is_active) 
-VALUES ('admin', 'admin@voting.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'System', 'Administrator', 'ADMIN', true, true);
+VALUES ('admin', 'admin@voting.com', '$2a$12$AVHkcsc/wVRAa7w6z26wfO3F8Mztl72hO99xnNssrh4o4UtDFZAQ2', 'System', 'Administrator', 'ADMIN', true, true);
 
 -- Insert election official
 INSERT INTO users (username, email, password_hash, first_name, last_name, role, is_verified, is_active) 
-VALUES ('election_official', 'official@voting.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Election', 'Official', 'ELECTION_OFFICIAL', true, true);
+VALUES ('election_official', 'official@voting.com', '$2a$12$AVHkcsc/wVRAa7w6z26wfO3F8Mztl72hO99xnNssrh4o4UtDFZAQ2', 'Election', 'Official', 'ELECTION_OFFICIAL', true, true);
 
 -- Insert sample voters
 INSERT INTO users (username, email, password_hash, first_name, last_name, role, is_verified, is_active) 
 VALUES 
-('voter1', 'voter1@example.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'John', 'Doe', 'VOTER', true, true),
-('voter2', 'voter2@example.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Jane', 'Smith', 'VOTER', true, true),
-('voter3', 'voter3@example.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Bob', 'Johnson', 'VOTER', true, true);
+('voter1', 'voter1@example.com', '$2a$12$AVHkcsc/wVRAa7w6z26wfO3F8Mztl72hO99xnNssrh4o4UtDFZAQ2', 'John', 'Doe', 'VOTER', true, true),
+('voter2', 'voter2@example.com', '$2a$12$AVHkcsc/wVRAa7w6z26wfO3F8Mztl72hO99xnNssrh4o4UtDFZAQ2', 'Jane', 'Smith', 'VOTER', true, true),
+('voter3', 'voter3@example.com', '$2a$12$AVHkcsc/wVRAa7w6z26wfO3F8Mztl72hO99xnNssrh4o4UtDFZAQ2', 'Bob', 'Johnson', 'VOTER', true, true);
 
 -- Insert sample election
 INSERT INTO elections (title, description, start_date, end_date, status, max_votes_per_voter, created_by) 

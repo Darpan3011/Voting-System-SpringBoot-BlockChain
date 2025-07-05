@@ -2,6 +2,7 @@ package com.voting.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
@@ -28,20 +29,17 @@ public class EncryptionUtil {
     private final SecretKey secretKey;
     private final SecureRandom secureRandom;
     
-    public EncryptionUtil() {
-        this.secretKey = generateSecretKey();
+    public EncryptionUtil(@Value("${encryption.aes-key}") String base64Key) {
+        this.secretKey = loadSecretKey(base64Key);
         this.secureRandom = new SecureRandom();
     }
     
-    private SecretKey generateSecretKey() {
-        try {
-            KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-            keyGen.init(KEY_LENGTH);
-            return keyGen.generateKey();
-        } catch (Exception e) {
-            logger.error("Error generating secret key", e);
-            throw new RuntimeException("Failed to generate secret key", e);
+    private SecretKey loadSecretKey(String base64Key) {
+        if (base64Key == null) {
+            throw new IllegalStateException("Encryption key not set in environment variable VOTING_APP_AES_KEY");
         }
+        byte[] decodedKey = Base64.getDecoder().decode(base64Key);
+        return new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
     }
     
     public String encryptBallot(String ballotData) {

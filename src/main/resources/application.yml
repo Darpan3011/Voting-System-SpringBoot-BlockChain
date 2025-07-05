@@ -32,7 +32,7 @@ spring:
   
   sql:
     init:
-      mode: always
+      mode: never
       data-locations: classpath:data.sql
 
 server:
@@ -71,4 +71,7 @@ blockchain:
   ethereum:
     node-url: http://127.0.0.1:8545
     private-key: 0xfe88b79f12a80989ac6fe90fbd07efa7f37b3284f77dac4f6aed6b8197a323b4
-    chain-id: 1337  # 1 for mainnet, 5 for Goerli, etc. 
+    chain-id: 1337  # 1 for mainnet, 5 for Goerli, etc.
+
+encryption:
+  aes-key: "v52X9zOH4HEKPyNQKJUK3DFmM2NoP6kpb52pSybXeK4="

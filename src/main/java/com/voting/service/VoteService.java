@@ -1,6 +1,7 @@
 package com.voting.service;
 
 import com.voting.dto.VoteRequest;
+import com.voting.dto.VoteResponse;
 import com.voting.entity.*;
 import com.voting.repository.*;
 import com.voting.util.EncryptionUtil;
@@ -36,7 +37,7 @@ public class VoteService {
     @Autowired
     private BlockchainService blockchainService;
 
-    public Vote castVote(VoteRequest request, Long voterId) {
+    public VoteResponse castVote(VoteRequest request, Long voterId) {
         // Check if election exists and is active
         Election election = electionRepository.findById(request.getElectionId())
                 .orElseThrow(() -> new RuntimeException("Election not found"));
@@ -65,37 +66,41 @@ public class VoteService {
 
         // Create vote
         Vote vote = new Vote(election, voter, encryptedBallot, ballotHash);
-        vote = voteRepository.save(vote);
-
-        // Real blockchain transaction
-        try {
-            var receipt = blockchainService.sendTransaction(vote.getId() + ballotHash);
-            BlockchainTransaction transaction = new BlockchainTransaction(vote, receipt.getTransactionHash());
-            transaction.setBlockNumber(receipt.getBlockNumber().longValue());
-            transaction.setGasUsed(receipt.getGasUsed().longValue());
-            transaction.setStatus(receipt.isStatusOK() ? BlockchainTransaction.TransactionStatus.CONFIRMED : BlockchainTransaction.TransactionStatus.FAILED);
-            blockchainTransactionRepository.save(transaction);
-            // Update vote with real transaction ID
-            vote.setTransactionId(receipt.getTransactionHash());
-            vote.setIsVerified(receipt.isStatusOK());
-        } catch (Exception e) {
-            // If blockchain fails, mark as failed
-            BlockchainTransaction transaction = new BlockchainTransaction(vote, "BLOCKCHAIN_FAILED");
-            transaction.setStatus(BlockchainTransaction.TransactionStatus.FAILED);
-            blockchainTransactionRepository.save(transaction);
-            vote.setIsVerified(false);
-        }
-        return voteRepository.save(vote);
+        Vote savedVote = voteRepository.save(vote);
+        return toDto(savedVote);
     }
 
-    public Optional<Vote> getVoteById(Long id) {
-        return voteRepository.findById(id);
+    public Optional<VoteResponse> getVoteById(Long id) {
+        return voteRepository.findById(id).map(this::toDto);
     }
 
     public List<Vote> getVotesByElection(Long electionId) {
         return voteRepository.findAll().stream()
                 .filter(vote -> vote.getElection().getId().equals(electionId))
                 .collect(Collectors.toList());
+    }
+
+    public List<VoteResponse> getVoteResponsesByElection(Long electionId) {
+        return getVotesByElection(electionId).stream().map(this::toDto).collect(Collectors.toList());
+    }
+
+    private VoteResponse toDto(Vote vote) {
+        // Only expose non-sensitive fields
+        Long candidateId = null;
+        try {
+            String decryptedBallot = encryptionUtil.decryptBallot(vote.getEncryptedBallot());
+            candidateId = Long.parseLong(decryptedBallot);
+        } catch (Exception e) {
+            // ignore, keep candidateId null
+        }
+        return new VoteResponse(
+            vote.getId(),
+            vote.getElection() != null ? vote.getElection().getId() : null,
+            candidateId,
+            vote.getCreatedAt(),
+            vote.getTransactionId(),
+            vote.getIsVerified()
+        );
     }
 
     public Map<Long, Long> getElectionResults(Long electionId) {

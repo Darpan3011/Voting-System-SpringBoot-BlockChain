@@ -1,6 +1,7 @@
 package com.voting.controller;
 
 import com.voting.dto.CandidateRequest;
+import com.voting.dto.CandidateResponse;
 import com.voting.entity.Candidate;
 import com.voting.service.CandidateService;
 import jakarta.validation.Valid;
@@ -18,24 +19,24 @@ public class CandidateController {
     private CandidateService candidateService;
 
     @GetMapping("/election/{electionId}")
-    public ResponseEntity<List<Candidate>> getCandidatesByElection(@PathVariable Long electionId) {
+    public ResponseEntity<List<CandidateResponse>> getCandidatesByElection(@PathVariable Long electionId) {
         return ResponseEntity.ok(candidateService.getCandidatesByElection(electionId));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Candidate> getCandidate(@PathVariable Long id) {
+    public ResponseEntity<CandidateResponse> getCandidate(@PathVariable Long id) {
         return candidateService.getCandidateById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Candidate> createCandidate(@Valid @RequestBody CandidateRequest request) {
+    public ResponseEntity<CandidateResponse> createCandidate(@Valid @RequestBody CandidateRequest request) {
         return ResponseEntity.ok(candidateService.createCandidate(request));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Candidate> updateCandidate(@PathVariable Long id, @Valid @RequestBody CandidateRequest request) {
+    public ResponseEntity<CandidateResponse> updateCandidate(@PathVariable Long id, @Valid @RequestBody CandidateRequest request) {
         return ResponseEntity.ok(candidateService.updateCandidate(id, request));
     }
 

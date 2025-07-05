@@ -53,6 +53,7 @@ CREATE TABLE candidates (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (election_id) REFERENCES elections(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_candidate_per_election (election_id, name),
     INDEX idx_election_id (election_id)
 );
 

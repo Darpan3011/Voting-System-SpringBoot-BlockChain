@@ -1,6 +1,7 @@
 package com.voting.service;
 
 import com.voting.dto.ElectionRequest;
+import com.voting.dto.ElectionResponse;
 import com.voting.entity.Election;
 import com.voting.entity.User;
 import com.voting.repository.ElectionRepository;
@@ -21,15 +22,15 @@ public class ElectionService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<Election> getAllElections() {
-        return electionRepository.findAll();
+    public List<ElectionResponse> getAllElections() {
+        return electionRepository.findAll().stream().map(this::toDto).toList();
     }
 
-    public Optional<Election> getElectionById(Long id) {
-        return electionRepository.findById(id);
+    public Optional<ElectionResponse> getElectionById(Long id) {
+        return electionRepository.findById(id).map(this::toDto);
     }
 
-    public Election createElection(ElectionRequest request, Long createdByUserId) {
+    public ElectionResponse createElection(ElectionRequest request, Long createdByUserId) {
         User createdBy = userRepository.findById(createdByUserId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -42,20 +43,22 @@ public class ElectionService {
         election.setCreatedBy(createdBy);
         election.setStatus(Election.ElectionStatus.DRAFT);
 
-        return electionRepository.save(election);
+        Election saved = electionRepository.save(election);
+        return toDto(saved);
     }
 
-    public Election updateElectionStatus(Long electionId, Election.ElectionStatus status) {
+    public ElectionResponse updateElectionStatus(Long electionId, Election.ElectionStatus status) {
         Election election = electionRepository.findById(electionId)
                 .orElseThrow(() -> new RuntimeException("Election not found"));
         election.setStatus(status);
-        return electionRepository.save(election);
+        Election saved = electionRepository.save(election);
+        return toDto(saved);
     }
 
-    public List<Election> getActiveElections() {
-        LocalDateTime now = LocalDateTime.now();
+    public List<ElectionResponse> getActiveElections() {
         return electionRepository.findAll().stream()
-                .filter(election -> election.isActive())
+                .filter(Election::isActive)
+                .map(this::toDto)
                 .toList();
     }
 
@@ -63,5 +66,20 @@ public class ElectionService {
         return electionRepository.findById(electionId)
                 .map(Election::isActive)
                 .orElse(false);
+    }
+
+    private ElectionResponse toDto(Election election) {
+        return new ElectionResponse(
+                election.getId(),
+                election.getTitle(),
+                election.getDescription(),
+                election.getStartDate(),
+                election.getEndDate(),
+                election.getStatus() != null ? election.getStatus().name() : null,
+                election.getMaxVotesPerVoter(),
+                election.getCreatedBy() != null ? election.getCreatedBy().getUsername() : null,
+                election.getCreatedAt(),
+                election.getUpdatedAt()
+        );
     }
 } 
