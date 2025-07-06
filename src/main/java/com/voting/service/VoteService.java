@@ -67,6 +67,18 @@ public class VoteService {
         // Create vote
         Vote vote = new Vote(election, voter, encryptedBallot, ballotHash);
         Vote savedVote = voteRepository.save(vote);
+
+        // Submit to blockchain and get transaction hash
+        try {
+            var receipt = blockchainService.sendTransaction(ballotHash);
+            String transactionId = receipt.getTransactionHash();
+            savedVote.setTransactionId(transactionId);
+            savedVote = voteRepository.save(savedVote);
+        } catch (Exception e) {
+            // Optionally handle blockchain failure (e.g., log, rethrow, or mark vote as needing retry)
+            throw new RuntimeException("Blockchain transaction failed: " + e.getMessage(), e);
+        }
+
         return toDto(savedVote);
     }
 
